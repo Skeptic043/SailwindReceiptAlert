@@ -12,7 +12,7 @@ public sealed class ReceiptAlertPlugin : BaseUnityPlugin
 {
     public const string PluginId = "skeptic043.sailwind.receiptalert";
     public const string PluginName = "Sailwind Receipt Alert";
-    public const string PluginVersion = "0.1.0";
+    public const string PluginVersion = "0.1.1";
 
     internal const string WarningText = "Don't forget your trade receipt!";
     internal static readonly Vector3 ZoneSize = new Vector3(12f, 4f, 12f);
@@ -56,19 +56,56 @@ public sealed class ReceiptAlertPlugin : BaseUnityPlugin
             log.LogWarning($"{message}: {error}");
     }
 
-    internal static void WarnIfReceiptAvailable()
+    internal static bool WarnIfReceiptAvailable()
     {
         ReceiptAlertPlugin? plugin = _instance;
         if (plugin == null || plugin._enabled?.Value != true)
-            return;
+            return false;
 
         EconomyUIReceiptScribe scribe = EconomyUIReceiptScribe.instance;
         if (!scribe || !scribe.ReceiptAvailable())
-            return;
+            return false;
 
         NotificationUi notification = NotificationUi.instance;
-        if (notification)
-            notification.ShowNotification(WarningText);
+        if (!notification)
+            return false;
+
+        notification.ShowNotification(WarningText);
+        return true;
+    }
+
+    internal static void LogPlayerEvent(string phase, Collider collider, string area, bool? notificationCalled)
+    {
+        ReceiptAlertPlugin? plugin = _instance;
+        if (plugin == null)
+            return;
+
+        try
+        {
+            EconomyUIReceiptScribe scribe = EconomyUIReceiptScribe.instance;
+            string receipt = "unknown";
+            if (scribe)
+            {
+                try
+                {
+                    receipt = scribe.ReceiptAvailable() ? "available" : "unavailable";
+                }
+                catch (Exception error)
+                {
+                    receipt = $"check-failed:{error.GetType().Name}";
+                }
+            }
+
+            plugin.Logger.LogDebug(
+                $"Player-tagged collider {phase} receipt zone at {area}: " +
+                $"collider={collider.name} ({collider.GetType().Name}, id={collider.GetInstanceID()}), " +
+                $"scribe={(bool)scribe}, receipt={receipt}, notification={(bool)NotificationUi.instance}, " +
+                $"enabled={plugin._enabled?.Value == true}, notificationCalled={notificationCalled?.ToString() ?? "n/a"}.");
+        }
+        catch (Exception error)
+        {
+            plugin.Logger.LogDebug($"Could not log receipt zone {phase} event at {area}: {error.GetType().Name}.");
+        }
     }
 }
 
@@ -154,25 +191,47 @@ public sealed class ReceiptAlertSkippedMarker : MonoBehaviour
 
 public sealed class ReceiptAlertZone : MonoBehaviour
 {
+    private const int MaxPlayerEventLogs = 12;
     private bool _callbackFailureLogged;
+    private int _playerEventLogs;
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other && other.CompareTag("Player"))
+            LogPlayerEvent("entered", other, null);
+    }
 
     private void OnTriggerExit(Collider other)
     {
-        // Require Sailwind's local controller as well as the tag used by PortDude.
-        if (!other || !other.CompareTag("Player") || other != Refs.charController)
+        // PortDude itself uses the Player tag to identify the player collider.
+        if (!other || !other.CompareTag("Player"))
             return;
 
+        bool notificationCalled = false;
         try
         {
-            ReceiptAlertPlugin.WarnIfReceiptAvailable();
+            notificationCalled = ReceiptAlertPlugin.WarnIfReceiptAvailable();
         }
         catch (Exception error)
         {
-            if (_callbackFailureLogged)
-                return;
-
-            _callbackFailureLogged = true;
-            ReceiptAlertPlugin.LogSetupFailure($"Receipt warning failed at {transform.parent?.name}", error);
+            if (!_callbackFailureLogged)
+            {
+                _callbackFailureLogged = true;
+                ReceiptAlertPlugin.LogSetupFailure($"Receipt warning failed at {transform.parent?.name}", error);
+            }
         }
+
+        LogPlayerEvent("exited", other, notificationCalled);
+    }
+
+    private void LogPlayerEvent(string phase, Collider other, bool? notificationCalled)
+    {
+        if (_playerEventLogs >= MaxPlayerEventLogs)
+            return;
+
+        _playerEventLogs++;
+        ReceiptAlertPlugin.LogPlayerEvent(phase, other, transform.parent?.name ?? name, notificationCalled);
+        if (_playerEventLogs == MaxPlayerEventLogs)
+            ReceiptAlertPlugin.LogSetup($"Receipt zone at {transform.parent?.name ?? name} reached its player-event debug log limit.");
     }
 }
