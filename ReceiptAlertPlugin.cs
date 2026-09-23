@@ -12,7 +12,7 @@ public sealed class ReceiptAlertPlugin : BaseUnityPlugin
 {
     public const string PluginId = "skeptic043.sailwind.receiptalert";
     public const string PluginName = "Sailwind Receipt Alert";
-    public const string PluginVersion = "0.1.1";
+    public const string PluginVersion = "1.0.0";
 
     internal const string WarningText = "Don't forget your trade receipt!";
     internal static readonly Vector3 ZoneSize = new Vector3(12f, 4f, 12f);
