@@ -1,6 +1,6 @@
 # Sailwind Receipt Alert
 
-Get a brief in-game reminder when you walk away from a port's trade and mission desk with a trade receipt still waiting.
+Get a brief reminder or automatically collect a waiting trade receipt when you walk away from a port's trade and mission desk.
 
 ## Install
 
@@ -16,11 +16,16 @@ Install [Sailwind Receipt Alert](https://thunderstore.io/c/sailwind/p/Skeptic043
 
 ## How it works
 
-After buying or selling through a port's trade book, leave the trade and mission desk area without collecting the receipt. Sailwind briefly reminds you to pick it up. The reminder works at indoor and outdoor desks. If you return and leave again while the receipt is still waiting, it appears again.
+After buying or selling through a port's trade book, leaving the trade and mission desk area with a receipt waiting shows a brief reminder. If you return and leave again without collecting it, the reminder appears again. With automatic collection enabled, leaving the same area instead adds the receipt to your trade receipts and shows a brief confirmation. The desk areas include indoor and outdoor ports.
 
 ## Configuration
 
-The mod is enabled by default. To turn it off, set `General.Enabled` to `false` in `BepInEx/config/skeptic043.sailwind.receiptalert.cfg` after the first launch.
+After the first launch, edit `BepInEx/config/skeptic043.sailwind.receiptalert.cfg` to change these settings:
+
+| Setting | Default | Values | Effect |
+| --- | --- | --- | --- |
+| `General.Enabled` | `true` | `true`, `false` | Enables or disables the mod. |
+| `General.AutoCollectReceipt` | `false` | `true`, `false` | Collects the receipt when you leave the desk area. When `false`, the mod only reminds you. |
 
 ## AI Use
 

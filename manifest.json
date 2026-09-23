@@ -1,8 +1,8 @@
 {
   "name": "Sailwind_Receipt_Alert",
-  "version_number": "1.0.0",
+  "version_number": "1.1.0",
   "website_url": "https://github.com/Skeptic043/SailwindReceiptAlert",
-  "description": "Get a brief reminder when you leave a Sailwind trade desk with an uncollected trade receipt.",
+  "description": "Get a reminder or automatically collect a trade receipt when you leave a Sailwind trade desk.",
   "dependencies": [
     "BepInEx-BepInExPack-5.4.2305"
   ]
