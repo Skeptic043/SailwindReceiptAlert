@@ -14,11 +14,9 @@ Install Sailwind Receipt Alert through **r2modman** or **Thunderstore Mod Manage
 2. Download and extract the mod ZIP. Copy its `plugins/SailwindReceiptAlert` folder into `BepInEx/plugins` in your Sailwind folder.
 3. Launch Sailwind normally.
 
-## During play
+## How it works
 
 After buying or selling through a port's trade book, leave the trade and mission desk area without collecting the receipt. Sailwind briefly reminds you to pick it up. The reminder works at indoor and outdoor desks. If you return and leave again while the receipt is still waiting, it appears again.
-
-Collecting the receipt stops the reminder. Sailwind clears an uncollected receipt when you reload a save.
 
 ## Configuration
 
