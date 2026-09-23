@@ -14,7 +14,7 @@ Run `./Build.ps1 -GameDirectory 'C:\path\to\Sailwind' -BepInExCoreDirectory 'C:\
 
 ## Check in game
 
-After trading, close the trade book and walk away from the desk before collecting the receipt. A brief native notification should appear once as you leave the area. Re-enter and leave to see it again. Collect or print the receipt and repeat to confirm no warning appears. Check both an indoor office and an outdoor desk. Version 0.1.1 still needs this in-game check after 0.1.0 missed the alert at Fort Aestrin and Dragon Cliffs. If the alert does not appear, `Player.log` records bounded debug lines for player-tagged trigger entries and exits.
+After trading, close the trade book and walk away from the desk before collecting the receipt. A brief native notification should appear once as you leave the area. Re-enter and leave to see it again. Collect or print the receipt and repeat to confirm no warning appears. Version 0.1.1 was user-tested at indoor and outdoor desks with and without a waiting receipt, including a second exit while the receipt was still waiting. Save/reload has not yet been checked. If the alert does not appear, `Player.log` records bounded debug lines for player-tagged trigger entries and exits.
 
 ## License
 
