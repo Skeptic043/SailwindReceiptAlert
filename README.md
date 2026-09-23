@@ -6,7 +6,7 @@ Get a brief in-game reminder when you walk away from a port's trade and mission 
 
 ### Mod managers
 
-Install Sailwind Receipt Alert through **r2modman** or **Thunderstore Mod Manager**, then launch Sailwind through your manager. Dependencies are installed automatically.
+Install [Sailwind Receipt Alert](https://thunderstore.io/c/sailwind/p/Skeptic043/Sailwind_Receipt_Alert/) through **r2modman** or **Thunderstore Mod Manager**, then launch Sailwind through your manager. Dependencies are installed automatically.
 
 ### Manual installation
 
