@@ -15,3 +15,5 @@ To build the DLL and create a Thunderstore package ZIP:
 ```
 
 The package and its SHA-256 checksum are written to `artifacts/release/`. The ZIP contains only the package metadata, public documentation, license, icon, and mod DLL. It does not contain game or BepInEx assemblies.
+
+Run `./tools/Render-Icon.ps1` to regenerate the 256×256 icon from its editable shapes.
