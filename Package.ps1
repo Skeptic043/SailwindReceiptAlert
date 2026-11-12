@@ -1,10 +1,10 @@
 param(
-    [string]$GameDirectory = $env:SAILWIND_GAME_DIR,
-    [string]$BepInExCoreDirectory = $env:BEPINEX_CORE_DIR
+    [string]$GameManagedDir = 'C:\Steam Games\steamapps\common\Sailwind\Sailwind_Data\Managed',
+    [string]$ReferenceDir = ''
 )
 
 $ErrorActionPreference = 'Stop'
-& (Join-Path $PSScriptRoot 'Build.ps1') -GameDirectory $GameDirectory -BepInExCoreDirectory $BepInExCoreDirectory
+& (Join-Path $PSScriptRoot 'Build.ps1') -GameManagedDir $GameManagedDir -ReferenceDir $ReferenceDir
 
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 Add-Type -AssemblyName System.Drawing
@@ -16,13 +16,6 @@ if ([string]::IsNullOrWhiteSpace($manifest.description) -or $manifest.descriptio
     throw 'Package description must contain 1-250 characters.'
 }
 if ($manifest.website_url -notmatch '^https?://') { throw 'Invalid website URL.' }
-if (@($manifest.dependencies).Count -ne 1 -or $manifest.dependencies[0] -ne 'BepInEx-BepInExPack-5.4.2305') {
-    throw 'The package must depend on Sailwind BepInExPack.'
-}
-
-$pluginSource = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'ReceiptAlertPlugin.cs') -Raw
-$pluginVersion = [regex]::Match($pluginSource, 'PluginVersion\s*=\s*"([^"]+)"').Groups[1].Value
-if ($pluginVersion -ne $manifest.version_number) { throw 'Plugin and package versions differ.' }
 
 $icon = [Drawing.Image]::FromFile((Join-Path $PSScriptRoot 'icon.png'))
 try {
@@ -39,51 +32,24 @@ $files = [ordered]@{
     'CHANGELOG.md' = (Join-Path $PSScriptRoot 'CHANGELOG.md')
     'LICENSE' = (Join-Path $PSScriptRoot 'LICENSE')
     'icon.png' = (Join-Path $PSScriptRoot 'icon.png')
-    'plugins/SailwindReceiptAlert/SailwindReceiptAlert.dll' = (Join-Path $PSScriptRoot 'bin/Release/net471/SailwindReceiptAlert.dll')
+    'BepInEx/plugins/SailwindReceiptAlert/SailwindReceiptAlert.dll' = (Join-Path $PSScriptRoot 'bin/Release/net471/SailwindReceiptAlert.dll')
 }
 foreach ($source in $files.Values) {
-    if (-not (Test-Path -LiteralPath $source -PathType Leaf)) { throw "Missing release file: $source" }
+    if (-not (Test-Path -LiteralPath $source -PathType Leaf)) { throw "Missing package file: $source" }
 }
 
-$outputDirectory = Join-Path $PSScriptRoot 'artifacts/release'
+$outputDirectory = Join-Path $PSScriptRoot 'artifacts'
 New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
-$zipPath = Join-Path $outputDirectory "$($manifest.name)-$($manifest.version_number).zip"
-$temporary = "$zipPath.$([Guid]::NewGuid().ToString('N')).tmp"
+$zipPath = Join-Path $outputDirectory "SailwindReceiptAlert-$($manifest.version_number).zip"
+if (Test-Path -LiteralPath $zipPath) { Remove-Item -LiteralPath $zipPath }
+
+$archive = [IO.Compression.ZipFile]::Open($zipPath, [IO.Compression.ZipArchiveMode]::Create)
 try {
-    $archive = [IO.Compression.ZipFile]::Open($temporary, [IO.Compression.ZipArchiveMode]::Create)
-    try {
-        foreach ($entry in $files.GetEnumerator()) {
-            $null = [IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
-                $archive, $entry.Value, $entry.Key, [IO.Compression.CompressionLevel]::Optimal)
-        }
+    foreach ($entry in $files.GetEnumerator()) {
+        $null = [IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
+            $archive, $entry.Value, $entry.Key, [IO.Compression.CompressionLevel]::Optimal)
     }
-    finally { $archive.Dispose() }
-
-    $archive = [IO.Compression.ZipFile]::OpenRead($temporary)
-    try {
-        if ($archive.Entries.Count -ne $files.Count) { throw 'Package entry count differs.' }
-        foreach ($entry in $files.GetEnumerator()) {
-            $packed = $archive.GetEntry($entry.Key)
-            if ($null -eq $packed) { throw "Missing package entry: $($entry.Key)" }
-            $stream = $packed.Open()
-            $sha = [Security.Cryptography.SHA256]::Create()
-            try { $hash = [BitConverter]::ToString($sha.ComputeHash($stream)).Replace('-', '') }
-            finally { $stream.Dispose(); $sha.Dispose() }
-            if ($hash -ne (Get-FileHash -LiteralPath $entry.Value -Algorithm SHA256).Hash) {
-                throw "Package hash mismatch: $($entry.Key)"
-            }
-        }
-    }
-    finally { $archive.Dispose() }
-
-    Move-Item -LiteralPath $temporary -Destination $zipPath -Force
 }
-finally {
-    if (Test-Path -LiteralPath $temporary) { Remove-Item -LiteralPath $temporary }
-}
+finally { $archive.Dispose() }
 
-$checksumPath = Join-Path $outputDirectory "SHA256SUMS-$($manifest.version_number).txt"
-$checksum = "$( (Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash )  $([IO.Path]::GetFileName($zipPath))"
-[IO.File]::WriteAllText($checksumPath, "$checksum`n", [Text.UTF8Encoding]::new($false))
-Write-Host "Verified $($files.Count) files in $zipPath"
-Write-Host $checksum
+Write-Host "Packaged $($files.Count) files in $zipPath"

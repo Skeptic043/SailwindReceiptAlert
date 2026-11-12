@@ -1,48 +1,30 @@
 param(
-    [string]$GameDirectory = $env:SAILWIND_GAME_DIR,
-    [string]$BepInExCoreDirectory = $env:BEPINEX_CORE_DIR
+    [string]$GameManagedDir = 'C:\Steam Games\steamapps\common\Sailwind\Sailwind_Data\Managed',
+    [string]$ReferenceDir = ''
 )
 
 $ErrorActionPreference = 'Stop'
-$projectDirectory = $PSScriptRoot
-
-if (-not $GameDirectory) {
-    $usualSteamDirectory = 'C:\Steam Games\steamapps\common\Sailwind'
-    if (Test-Path -LiteralPath $usualSteamDirectory -PathType Container) {
-        $GameDirectory = $usualSteamDirectory
+if ([string]::IsNullOrWhiteSpace($ReferenceDir)) {
+    $localReferences = Join-Path $PSScriptRoot '.local\references'
+    if (Test-Path -LiteralPath (Join-Path $localReferences 'BepInEx.dll')) {
+        $ReferenceDir = $localReferences
+    } else {
+        $ReferenceDir = Join-Path $env:LOCALAPPDATA 'SailwindModSynchronizer\packs\default\instance\BepInEx\core'
     }
 }
 
-if (-not $GameDirectory) {
-    throw 'Set -GameDirectory or SAILWIND_GAME_DIR to your installed Sailwind directory.'
-}
-
-$managedDirectory = Join-Path $GameDirectory 'Sailwind_Data\Managed'
-foreach ($name in @('Assembly-CSharp.dll', 'UnityEngine.dll', 'UnityEngine.CoreModule.dll', 'UnityEngine.PhysicsModule.dll')) {
-    if (-not (Test-Path -LiteralPath (Join-Path $managedDirectory $name) -PathType Leaf)) {
-        throw "Missing game reference: $name in $managedDirectory"
+foreach ($required in @(
+    (Join-Path $GameManagedDir 'Assembly-CSharp.dll'),
+    (Join-Path $GameManagedDir 'UnityEngine.CoreModule.dll'),
+    (Join-Path $GameManagedDir 'UnityEngine.PhysicsModule.dll'),
+    (Join-Path $ReferenceDir 'BepInEx.dll'),
+    (Join-Path $ReferenceDir '0Harmony.dll')
+)) {
+    if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
+        throw "Required build reference is missing: $required"
     }
 }
 
-$referenceDirectory = Join-Path $projectDirectory '.local\references'
-if ($BepInExCoreDirectory) {
-    New-Item -ItemType Directory -Path $referenceDirectory -Force | Out-Null
-    foreach ($name in @('BepInEx.dll', '0Harmony.dll')) {
-        $source = Join-Path $BepInExCoreDirectory $name
-        if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
-            throw "Missing loader reference: $source"
-        }
-        Copy-Item -LiteralPath $source -Destination (Join-Path $referenceDirectory $name) -Force
-    }
-}
-
-foreach ($name in @('BepInEx.dll', '0Harmony.dll')) {
-    if (-not (Test-Path -LiteralPath (Join-Path $referenceDirectory $name) -PathType Leaf)) {
-        throw "Missing loader reference: $name. Set -BepInExCoreDirectory or BEPINEX_CORE_DIR."
-    }
-}
-
-& dotnet build (Join-Path $projectDirectory 'SailwindReceiptAlert.csproj') -c Release -p:GameManagedDir="$managedDirectory"
-if ($LASTEXITCODE -ne 0) {
-    throw "dotnet build failed with exit code $LASTEXITCODE"
-}
+& dotnet build (Join-Path $PSScriptRoot 'SailwindReceiptAlert.csproj') -c Release `
+    "-p:GameManagedDir=$GameManagedDir" "-p:ReferenceDir=$ReferenceDir"
+if ($LASTEXITCODE -ne 0) { throw "Receipt Alert build failed with exit code $LASTEXITCODE." }

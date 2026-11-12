@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <GameManagedDir Condition="'$(GameManagedDir)' == ''">C:\Steam Games\steamapps\common\Sailwind\Sailwind_Data\Managed</GameManagedDir>
+    <ReferenceDir Condition="'$(ReferenceDir)' == ''">$(LOCALAPPDATA)\SailwindModSynchronizer\packs\default\instance\BepInEx\core</ReferenceDir>
+  </PropertyGroup>
+
+  <!-- The decision under test is shared with the plugin, not copied. -->
+  <ItemGroup>
+    <Compile Include="..\src\ReceiptExit.cs" Link="Shared\ReceiptExit.cs" />
+  </ItemGroup>
+
+  <!-- Mono.Cecil comes from the BepInEx install and is copied only into this test's bin folder. -->
+  <ItemGroup>
+    <Reference Include="Mono.Cecil"><HintPath>$(ReferenceDir)\Mono.Cecil.dll</HintPath><Private>true</Private></Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>GameManagedDir</_Parameter1>
+      <_Parameter2>$(GameManagedDir)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>

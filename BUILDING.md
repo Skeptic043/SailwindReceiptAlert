@@ -1,19 +1,37 @@
-# Building from source
+# Building Sailwind Receipt Alert
 
-Install the .NET SDK, Sailwind, and BepInEx 5. Run the following from this repository in PowerShell, using the directories for your installations:
+## Requirements
+
+- Windows with PowerShell 7 and the .NET 10 SDK (the tests target .NET 10).
+- .NET Framework 4.7.1 reference assemblies.
+- A local Sailwind installation with BepInEx 5.
+
+Game and loader assemblies are build references only. They are not included in this repository or its packages.
+
+## Build
+
+From the repository folder:
 
 ```powershell
-./Build.ps1 -GameDirectory 'C:\path\to\Sailwind' -BepInExCoreDirectory 'C:\path\to\BepInEx\core'
+pwsh -File ./Build.ps1 -GameManagedDir 'C:\Games\Sailwind\Sailwind_Data\Managed' -ReferenceDir 'C:\Games\Sailwind\BepInEx\core'
 ```
 
-The DLL is written to `bin/Release/net471/SailwindReceiptAlert.dll`. The build copies BepInEx and Harmony reference DLLs into the ignored `.local/references` directory. Game assemblies are read directly from the Sailwind installation. The build does not change the game installation.
+Use the paths for your own installation or mod profile. Without `-ReferenceDir`, the build uses `.local/references/` when it holds `BepInEx.dll`, otherwise the Sailwind Mod Synchronizer default pack's `BepInEx/core` folder. The output is `bin/Release/net471/SailwindReceiptAlert.dll`.
 
-To build the DLL and create a Thunderstore package ZIP:
+## Test
 
 ```powershell
-./Package.ps1 -GameDirectory 'C:\path\to\Sailwind' -BepInExCoreDirectory 'C:\path\to\BepInEx\core'
+pwsh -File ./Test.ps1 -GameManagedDir 'C:\Games\Sailwind\Sailwind_Data\Managed' -ReferenceDir 'C:\Games\Sailwind\BepInEx\core'
 ```
 
-The package and its SHA-256 checksum are written to `artifacts/release/`. The ZIP contains only the package metadata, public documentation, license, icon, and mod DLL. It does not contain game or BepInEx assemblies.
+This builds the mod, then checks which action leaving a desk takes for each setting combination and that the game members the mod hooks by name still exist. The checks read `Mono.Cecil.dll` from the BepInEx `core` folder. Any failure makes the command fail.
+
+## Package
+
+```powershell
+pwsh -File ./Package.ps1 -GameManagedDir 'C:\Games\Sailwind\Sailwind_Data\Managed' -ReferenceDir 'C:\Games\Sailwind\BepInEx\core'
+```
+
+This builds the mod and writes `artifacts/SailwindReceiptAlert-<version>.zip` with `BepInEx/plugins/SailwindReceiptAlert/`, `manifest.json`, `icon.png`, `README.md`, `CHANGELOG.md` and `LICENSE`.
 
 Run `./tools/Render-Icon.ps1` to regenerate the 256×256 icon from its editable shapes.

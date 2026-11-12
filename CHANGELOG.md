@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1
+
+### Changed
+- Code cleanup, no changes in game
+
 ## 1.1.0
 
 - Added optional toggle in config settings to allow automatic collection of receipt instead of only getting a warning
@@ -7,4 +12,5 @@
 
 ## 1.0.0
 
-Initial release. Reminds you when you leave a trade and mission desk with an uncollected trade receipt.
+### Initial Release
+- Reminds you when you leave a trade and mission desk with an uncollected trade receipt

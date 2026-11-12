@@ -15,6 +15,7 @@ AGENTS.override.md
 **/AGENTS.override.md
 .agents/
 **/.agents/
+.claude/
 .codex/
 **/.codex/
 PLAN.md

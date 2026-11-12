@@ -6,12 +6,12 @@ Get a brief reminder or automatically collect a waiting trade receipt when you w
 
 ### Mod managers
 
-Install [Sailwind Receipt Alert](https://thunderstore.io/c/sailwind/p/Skeptic043/Sailwind_Receipt_Alert/) through **r2modman** or **Thunderstore Mod Manager**, then launch Sailwind through your manager. Dependencies are installed automatically.
+Install Sailwind Receipt Alert through [Sailwind Mod Synchronizer](https://github.com/foxyv/SailwindModSynchronizer/releases/latest), r2modman or Thunderstore Mod Manager, then launch Sailwind through your manager. Dependencies are installed automatically.
 
 ### Manual installation
 
 1. Install [BepInEx 5](https://github.com/BepInEx/BepInEx/releases) in your Sailwind game folder, following its installation instructions.
-2. Download and extract the mod ZIP. Copy its `plugins/SailwindReceiptAlert` folder into `BepInEx/plugins` in your Sailwind folder.
+2. Download and extract the [Sailwind Receipt Alert ZIP](https://github.com/Skeptic043/SailwindReceiptAlert/releases/latest). Copy its `BepInEx/plugins/SailwindReceiptAlert` folder into `BepInEx/plugins` in your Sailwind folder.
 3. Launch Sailwind normally.
 
 ## How it works
@@ -20,19 +20,21 @@ After buying or selling through a port's trade book, leaving the trade and missi
 
 ## Configuration
 
-After the first launch, edit `BepInEx/config/skeptic043.sailwind.receiptalert.cfg` to change these settings:
+Settings are in `BepInEx/config/skeptic043.sailwind.receiptalert.cfg` after the first launch, or in game with the BepInEx 5 version of [BepInEx Configuration Manager](https://github.com/BepInEx/BepInEx.ConfigurationManager).
 
-| Setting | Default | Values | Effect |
-| --- | --- | --- | --- |
-| `General.Enabled` | `true` | `true`, `false` | Enables or disables the mod. |
-| `General.AutoCollectReceipt` | `false` | `true`, `false` | Collects the receipt when you leave the desk area. When `false`, the mod only reminds you. |
+| Setting | Default | Options |
+| --- | --- | --- |
+| `Enabled` | `true` | Turns the reminder and automatic collection on or off. |
+| `AutoCollectReceipt` | `false` | Collects the receipt when you leave the desk area. When `false`, the mod only reminds you. |
+
+## Compatibility
+
+No known incompatibilities.
 
 ## AI Use
 
 AI was used to write all of the code in this project. The original concept, design direction, testing, debugging, and release decisions are my own. If you prefer not to use mods developed with AI assistance, I understand and respect that choice.
 
-## Issues and links
+## Links
 
-[Report an issue](https://github.com/Skeptic043/SailwindReceiptAlert/issues) with your `BepInEx/LogOutput.log`.
-
-[Source code](https://github.com/Skeptic043/SailwindReceiptAlert) · [Build from source](https://github.com/Skeptic043/SailwindReceiptAlert/blob/main/BUILDING.md) · [MIT License](https://github.com/Skeptic043/SailwindReceiptAlert/blob/main/LICENSE) · [Support on Ko-fi](https://ko-fi.com/skeptic043) · skeptic043
+[Report an issue](https://github.com/Skeptic043/SailwindReceiptAlert/issues) · [Source code](https://github.com/Skeptic043/SailwindReceiptAlert) · [Release notes](https://github.com/Skeptic043/SailwindReceiptAlert/blob/main/CHANGELOG.md) · [Build instructions](https://github.com/Skeptic043/SailwindReceiptAlert/blob/main/BUILDING.md) · [License](https://github.com/Skeptic043/SailwindReceiptAlert/blob/main/LICENSE) · [Support on Ko-fi](https://ko-fi.com/skeptic043) · skeptic043
